@@ -1,0 +1,5 @@
+nsepython
+pandas
+numpy
+tqdm
+db-sqlite3
