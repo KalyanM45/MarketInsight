@@ -2,7 +2,7 @@ import pymongo
 import pandas as pd
 
 # Initialize the MongoDB client and database
-client = pymongo.MongoClient("mongodb+srv://kalyan:kalyan@cluster0.vnsa8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = pymongo.MongoClient()
 db = client["MarketInsight"]
 
 def Push_Records(records, collection_name):
