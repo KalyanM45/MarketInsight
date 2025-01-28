@@ -27,3 +27,11 @@ def Get_Records(collection_name):
     records = collection.find()
     records = pd.DataFrame(records)
     return records
+
+def Delete_Records(collection_name):
+    """
+    Deletes all records from the specified collection in the MongoDB database
+    """
+    collection = db[collection_name]
+    result = collection.delete_many({})
+    print(f"{result.deleted_count} Records Deleted from Collection: {collection_name} in DB: MarketInsight")

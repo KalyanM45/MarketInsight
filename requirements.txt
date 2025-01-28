@@ -3,3 +3,4 @@ pandas
 numpy
 tqdm
 db-sqlite3
+pymongo[srv]==3.6
