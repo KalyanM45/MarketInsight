@@ -1,6 +1,8 @@
-nsepython
-pandas
-numpy
-tqdm
-db-sqlite3
-pymongo[srv]==3.6
+fastapi
+pydantic
+uvicorn
+python-dotenv
+langchain-openai
+langgraph
+yfinance
+langchain
