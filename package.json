@@ -1,0 +1,14 @@
+{
+  "name": "market-insight",
+  "version": "1.0.0",
+  "description": "Market Insight - Stock Analysis Platform",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd . && python main.py",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

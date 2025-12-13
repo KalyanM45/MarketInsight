@@ -6,55 +6,55 @@ from MarketInsight.utils.logger import get_logger
 logger = get_logger("tools.py")
 
 # --------------------------------------------------------------------------------
-# Tool 1: Retreieve Company Stock Price
+# Tool 1: Retrieve Company Stock Price
 # --------------------------------------------------------------------------------
 @tool('get_stock_price', description="A function that returns the current stock price of a given ticker")
 def get_stock_price(ticker: str):
-    logger.info(f"Retreiving Stock Price of {ticker}")
+    logger.info(f"Retrieving Stock Price of {ticker}")
     start_time = time.time()
     stock = yf.Ticker(ticker)
     stock_price = stock.info['regularMarketPrice']
     end_time = time.time()
-    logger.info(f"Retreived Stock Price of {ticker} in {end_time - start_time:.3f} seconds")
+    logger.info(f"Retrieved Stock Price of {ticker} in {end_time - start_time:.3f} seconds")
     return stock_price
 
 # --------------------------------------------------------------------------------
-# Tool 2: Retreieve Company Stock Historical Data
+# Tool 2: Retrieve Company Stock Historical Data
 # --------------------------------------------------------------------------------
 @tool('get_historical_data', description="A function that returns the historical data of a given ticker in the given start and end date")
 def get_historical_data(ticker: str, start_date: str, end_date: str):
-    logger.info(f"Retreiving Historical Data of {ticker}")
+    logger.info(f"Retrieving Historical Data of {ticker}")
     start_time = time.time()
     stock = yf.Ticker(ticker)
     historical_data = stock.history(start=start_date, end=end_date).to_dict()
     end_time = time.time()
-    logger.info(f"Retreived Historical Data of {ticker} in {end_time - start_time:.3f} seconds")
+    logger.info(f"Retrieved Historical Data of {ticker} in {end_time - start_time:.3f} seconds")
     return historical_data
 
 # --------------------------------------------------------------------------------
-# Tool 3: Retreieve Company Stock News
+# Tool 3: Retrieve Company Stock News
 # --------------------------------------------------------------------------------
 @tool('get_stock_news', description="A function that returns the news of a given ticker")
 def get_stock_news(ticker: str):
-    logger.info(f"Retreiving News of {ticker}")
+    logger.info(f"Retrieving News of {ticker}")
     start_time = time.time()
     stock = yf.Ticker(ticker)
     news = stock.news
     end_time = time.time()
-    logger.info(f"Retreived News of {ticker} in {end_time - start_time:.3f} seconds")
+    logger.info(f"Retrieved News of {ticker} in {end_time - start_time:.3f} seconds")
     return news
 
 # --------------------------------------------------------------------------------
-# Tool 4: Retreieve Company's Balance Sheet
+# Tool 4: Retrieve Company's Balance Sheet
 # --------------------------------------------------------------------------------
 @tool('get_balance_sheet', description="A function that returns the balance sheet of a given ticker")
 def get_balance_sheet(ticker: str):
-    logger.info(f"Retreiving Balance Sheet of {ticker}")
+    logger.info(f"Retrieving Balance Sheet of {ticker}")
     start_time = time.time()
     stock = yf.Ticker(ticker)
     balance_sheet = stock.balance_sheet.to_dict()
     end_time = time.time()
-    logger.info(f"Retreived Balance Sheet of {ticker} in {end_time - start_time:.3f} seconds")
+    logger.info(f"Retrieved Balance Sheet of {ticker} in {end_time - start_time:.3f} seconds")
     return balance_sheet
 
 # --------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ def get_splits(ticker: str):
 
 
 # --------------------------------------------------------------------------------
-# Tool 12: Retrieve Institutional Holders
+# Tool 10: Retrieve Institutional Holders
 # --------------------------------------------------------------------------------
 @tool('get_institutional_holders', description="A function that returns the institutional ownership data of a given ticker")
 def get_institutional_holders(ticker: str):
@@ -131,7 +131,7 @@ def get_institutional_holders(ticker: str):
     return holders
 
 # --------------------------------------------------------------------------------
-# Tool 13: Retrieve Major Share Holders
+# Tool 11: Retrieve Major Share Holders
 # --------------------------------------------------------------------------------
 @tool('get_major_shareholders', description="A function that returns the major share holder data of a given ticker")
 def get_major_shareholders(ticker: str):
@@ -143,7 +143,7 @@ def get_major_shareholders(ticker: str):
     return holders
 
 # --------------------------------------------------------------------------------
-# Tool 14: Retrieve Mutual Fund Holders
+# Tool 12: Retrieve Mutual Fund Holders
 # --------------------------------------------------------------------------------
 @tool('get_mutual_fund_holders', description="A function that returns the mutual fund ownership data of a given ticker")
 def get_mutual_fund_holders(ticker: str):
@@ -155,7 +155,7 @@ def get_mutual_fund_holders(ticker: str):
     return holders
 
 # --------------------------------------------------------------------------------
-# Tool 15: Retrieve Insider Transactions
+# Tool 13: Retrieve Insider Transactions
 # --------------------------------------------------------------------------------
 @tool('get_insider_transactions', description="A function that returns the insider buy/sell transactions of a given ticker")
 def get_insider_transactions(ticker: str):
@@ -167,7 +167,7 @@ def get_insider_transactions(ticker: str):
     return insider_txn
 
 # --------------------------------------------------------------------------------
-# Tool 17: Retrieve Analyst Recommendations
+# Tool 14: Retrieve Analyst Recommendations
 # --------------------------------------------------------------------------------
 @tool('get_analyst_recommendations', description="A function that returns the analyst recommendations of a given ticker")
 def get_analyst_recommendations(ticker: str):
@@ -179,7 +179,7 @@ def get_analyst_recommendations(ticker: str):
     return recommendations
 
 # --------------------------------------------------------------------------------
-# Tool 18: Retrieve Analyst Recommendations Summary
+# Tool 15: Retrieve Analyst Recommendations Summary
 # --------------------------------------------------------------------------------
 @tool('get_analyst_recommendations_summary', description="A function that returns the analyst recommendations summary of a given ticker")
 def get_analyst_recommendations_summary(ticker: str):
