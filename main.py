@@ -10,7 +10,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://market-insight.vercel.app"],  # Update with your Vercel URL
+    allow_origins=["*"],  # Update with your Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -7,7 +7,7 @@ function App() {
   return (
     <div className='app-container'>
       <ThemeProvider mode="dark">
-        <C1Chat apiUrl='/api/chat' />
+        <C1Chat apiUrl='https://marketinsight-skgl.onrender.com/api/chat' />
       </ThemeProvider>
     </div>
 
