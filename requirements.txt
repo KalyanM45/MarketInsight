@@ -6,3 +6,4 @@ langchain-openai
 langgraph
 yfinance
 langchain
+langchain-core
