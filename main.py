@@ -18,6 +18,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for service monitoring and keep-alive pings"""
+    return {"status": "ok", "message": "Service is running"}
+
+
 @app.post("/api/chat")
 async def chat(request: RequestObject):
     config = {'configurable': {'thread_id': request.threadId}}
