@@ -1,7 +1,7 @@
 import './App.css'
 import { C1Chat, ThemeProvider } from '@thesysai/genui-sdk'
 import '@crayonai/react-ui/styles/index.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 function App() {
   const [showRecommendations, setShowRecommendations] = useState(true)
@@ -12,7 +12,7 @@ function App() {
     },
     {
       icon: '🧭',
-      text: "What are today's biggest gainers and losers in NSE?"
+      text: "What are today's biggest gainers and losers in Indian Market?"
     },
     {
       icon: '📰',
@@ -23,9 +23,11 @@ function App() {
       text: 'How global news connects with Indian market movements'
     }
   ]
-  const handleRecommendationClick = (text: string, event: React.MouseEvent) => {
+  const handleRecommendationClick = useCallback((text: string, event?: React.MouseEvent | Event) => {
     // Prevent event from bubbling up (which might close sidebar)
-    event.stopPropagation()
+    if (event) {
+      event.stopPropagation()
+    }
 
     // Find the input/textarea element in C1Chat
     setTimeout(() => {
@@ -79,9 +81,9 @@ function App() {
 
     // Hide recommendations after clicking
     setShowRecommendations(false)
-  }
+  }, [])
 
-  // Watch for chat resets (new chat button clicks)
+  // Watch for chat resets (new chat button clicks) and first message
   useEffect(() => {
     // Create a MutationObserver to watch for DOM changes
     const observer = new MutationObserver((mutations) => {
@@ -92,6 +94,16 @@ function App() {
           const messageContainer = document.querySelector('[class*="message"], [class*="chat"]')
           if (messageContainer && messageContainer.children.length === 0) {
             setShowRecommendations(true)
+          }
+        }
+
+        // Check if messages were added (user sent a message)
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // Look for new messages being added
+          const hasMessages = document.querySelector('[class*="message"], [class*="Message"]')
+          if (hasMessages && showRecommendations) {
+            // Hide recommendations after first message
+            setShowRecommendations(false)
           }
         }
       })
@@ -121,7 +133,7 @@ function App() {
       observer.disconnect()
       clearTimeout(timeoutId)
     }
-  }, [])
+  }, [showRecommendations])
 
   // Inject recommendations directly into the chat DOM
   useEffect(() => {
@@ -144,7 +156,6 @@ function App() {
       const inputElement = document.querySelector('textarea, input[type="text"]') as HTMLElement
 
       if (!inputElement) {
-        console.log('Input element not found yet, will retry...')
         return
       }
 
@@ -178,28 +189,28 @@ function App() {
         // Add click handlers
         document.querySelectorAll('.recommendation-box').forEach((box, index) => {
           box.addEventListener('click', (e) => {
-            e.stopPropagation() // Prevent sidebar from closing
             handleRecommendationClick(recommendations[index].text, e as any)
           })
         })
-
-        console.log('Recommendations injected into DOM')
       }
     }
 
-    // Try to inject with delays
-    setTimeout(injectRecommendations, 500)
-    setTimeout(injectRecommendations, 1000)
-    setTimeout(injectRecommendations, 2000)
+    // Try to inject with delays - store timeout IDs to clear them
+    const timeout1 = setTimeout(injectRecommendations, 500)
+    const timeout2 = setTimeout(injectRecommendations, 1000)
+    const timeout3 = setTimeout(injectRecommendations, 2000)
 
-    // Cleanup function
+    // Cleanup function - clear timeouts and remove injected elements
     return () => {
+      clearTimeout(timeout1)
+      clearTimeout(timeout2)
+      clearTimeout(timeout3)
       const injected = document.querySelector('.recommendations-wrapper-injected')
       if (injected) {
         injected.remove()
       }
     }
-  }, [showRecommendations, recommendations, handleRecommendationClick])
+  }, [showRecommendations, recommendations])
 
   return (
     <div className='app-container'>
@@ -208,9 +219,12 @@ function App() {
 
         <div className='app-container'>
           <ThemeProvider mode="dark">
-            <C1Chat apiUrl='https://marketinsight-skgl.onrender.com/api/chat'
+            <C1Chat
+              apiUrl='https://marketinsight-skgl.onrender.com/api/chat'
               agentName='Market Insight'
-              logoUrl='/icon.png' />
+              logoUrl='/icon.png'
+              formFactor='full-page'
+            />
           </ThemeProvider>
         </div>
 

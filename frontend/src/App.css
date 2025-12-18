@@ -40,6 +40,16 @@ body {
   opacity: 0.9;
 }
 
+/* Hide C1Chat sidebar/history panel */
+[class*="sidebar"],
+[class*="Sidebar"],
+[class*="history"],
+[class*="History"],
+[class*="thread-list"],
+[class*="ThreadList"] {
+  display: none !important;
+}
+
 /* Injected recommendations wrapper */
 .recommendations-wrapper-injected {
   position: relative;

@@ -12,7 +12,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://market-insight-theta.vercel.app/", "http://localhost:3000"],  # Update with your Vercel URL
+    allow_origins=["*"],  # Update with your Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
