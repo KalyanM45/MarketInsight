@@ -58,6 +58,11 @@ function useMessageSender() {
 
         inputElement.focus()
 
+        // Scroll input into view on mobile (fixes keyboard overlap issue)
+        setTimeout(() => {
+          inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 100)
+
         // Send the message
         setTimeout(() => {
           const sendButton = document.querySelector(
@@ -106,7 +111,21 @@ function App() {
         target.textContent?.toLowerCase().includes('new chat') ||
         target.getAttribute('aria-label')?.toLowerCase().includes('new chat')
       ) {
+        // Show recommendations again
         setTimeout(() => setShowRecommendations(true), 100)
+
+        // Close menu/sidebar on mobile after clicking New Chat
+        setTimeout(() => {
+          // Try to find and click the menu close button or backdrop
+          const menuButton = document.querySelector('[aria-label*="menu" i], [aria-label*="close" i]') as HTMLElement
+          const backdrop = document.querySelector('[class*="backdrop" i], [class*="overlay" i]') as HTMLElement
+
+          if (menuButton && window.innerWidth < 768) {
+            menuButton.click()
+          } else if (backdrop && window.innerWidth < 768) {
+            backdrop.click()
+          }
+        }, 200)
       }
     }
 
