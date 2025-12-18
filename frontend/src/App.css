@@ -1,15 +1,26 @@
+/* CSS Custom Properties */
+:root {
+  --bg-primary: rgba(10, 10, 15, 0.98);
+  --bg-secondary: rgba(20, 20, 30, 0.95);
+  --bg-hover: rgba(30, 30, 45, 0.98);
+  --border-color: rgba(255, 255, 255, 0.15);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.4);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Styles */
 html,
 body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
-}
-
-.app-container,
-.app-container * {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 #root {
@@ -22,69 +33,51 @@ body {
   height: 100vh;
   overflow: hidden;
   position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.app-header {
-  text-align: center;
-  color: white;
-  margin-bottom: 2rem;
+.app-container * {
+  font-family: inherit !important;
 }
 
-.app-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.app-header p {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-/* Hide C1Chat sidebar/history panel */
-[class*="sidebar"],
-[class*="Sidebar"],
-[class*="history"],
-[class*="History"],
-[class*="thread-list"],
-[class*="ThreadList"] {
-  display: none !important;
-}
-
-/* Injected recommendations wrapper */
-.recommendations-wrapper-injected {
+/* Recommendations Overlay */
+.recommendations-overlay {
   position: relative;
   z-index: 10;
-  pointer-events: none;
-}
-
-.recommendations-wrapper-injected * {
-  pointer-events: auto;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
 }
 
 /* Recommendations Container */
 .recommendations-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  padding: 0;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 /* Recommendation Box */
 .recommendation-box {
-  background: rgba(20, 20, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-smooth);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.75rem;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
+/* Gradient overlay effect */
 .recommendation-box::before {
   content: '';
   position: absolute;
@@ -92,57 +85,106 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .recommendation-box:hover::before {
   opacity: 1;
 }
 
+/* Hover state - GPU accelerated */
 .recommendation-box:hover {
-  background: rgba(30, 30, 45, 0.98);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
+/* Active state */
 .recommendation-box:active {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+/* Focus state for accessibility */
+.recommendation-box:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 2px;
 }
 
 /* Recommendation Icon */
 .recommendation-icon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   flex-shrink: 0;
   line-height: 1;
-  filter: grayscale(0.3);
-  transition: filter 0.3s ease;
+  filter: grayscale(0.2);
+  transition: filter 0.3s ease, transform 0.3s ease;
 }
 
 .recommendation-box:hover .recommendation-icon {
   filter: grayscale(0);
+  transform: scale(1.1);
 }
 
 /* Recommendation Text */
 .recommendation-text {
   margin: 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.8125rem;
-  line-height: 1.3;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
   flex: 1;
   transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .recommendation-box:hover .recommendation-text {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .recommendations-container {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .recommendation-box {
+    padding: 0.875rem;
+  }
+
+  .recommendation-icon {
+    font-size: 1.25rem;
+  }
+
+  .recommendation-text {
+    font-size: 0.8125rem;
+  }
+
+  .recommendations-overlay {
+    padding: 0 0.75rem;
+  }
+}
+
+/* Tablet breakpoint */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .recommendations-overlay {
+    max-width: 700px;
+  }
+}
+
+/* Smooth animations */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -1,45 +1,43 @@
 import './App.css'
 import { C1Chat, ThemeProvider } from '@thesysai/genui-sdk'
 import '@crayonai/react-ui/styles/index.css'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
-function App() {
-  const [showRecommendations, setShowRecommendations] = useState(true)
-  const recommendations = [
-    {
-      icon: '📊',
-      text: "Analyze the Indian stock market with today's key signals"
-    },
-    {
-      icon: '🧭',
-      text: "What are today's biggest gainers and losers in Indian Market?"
-    },
-    {
-      icon: '📰',
-      text: 'Track major stock market events shaping investor sentiment'
-    },
-    {
-      icon: '🌍',
-      text: 'How global news connects with Indian market movements'
-    }
-  ]
-  const handleRecommendationClick = useCallback((text: string, event?: React.MouseEvent | Event) => {
-    // Prevent event from bubbling up (which might close sidebar)
-    if (event) {
-      event.stopPropagation()
-    }
+// Recommendation data
+const RECOMMENDATIONS = [
+  {
+    icon: '📊',
+    text: "Analyze the Indian stock market with today's key signals"
+  },
+  {
+    icon: '🧭',
+    text: "What are today's biggest gainers and losers in Indian Market?"
+  },
+  {
+    icon: '📰',
+    text: 'Track major stock market events shaping investor sentiment'
+  },
+  {
+    icon: '🌍',
+    text: 'How global news connects with Indian market movements'
+  }
+]
 
-    // Find the input/textarea element in C1Chat
+// Custom hook for sending messages programmatically
+function useMessageSender() {
+  const sendMessage = useCallback((text: string) => {
+    // Set flag to prevent sidebar toggle
+    document.body.setAttribute('data-programmatic-interaction', 'true')
+
+    // Small delay to ensure C1Chat is ready
     setTimeout(() => {
-      // Try multiple selectors to find the input
       const inputElement = document.querySelector(
         'textarea, input[type="text"], [contenteditable="true"]'
       ) as HTMLTextAreaElement | HTMLInputElement | HTMLElement
 
       if (inputElement) {
-        // Set the value based on element type
+        // Set the input value
         if ('value' in inputElement) {
-          // For textarea and input elements
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
             inputElement instanceof HTMLTextAreaElement
               ? window.HTMLTextAreaElement.prototype
@@ -51,95 +49,108 @@ function App() {
             nativeInputValueSetter.call(inputElement, text)
           }
 
-          // Dispatch input event to trigger React's onChange
-          const inputEvent = new Event('input', { bubbles: true })
-          inputElement.dispatchEvent(inputEvent)
+          inputElement.dispatchEvent(new Event('input', { bubbles: true }))
+          inputElement.dispatchEvent(new Event('change', { bubbles: true }))
         } else if (inputElement.isContentEditable) {
-          // For contenteditable elements
           inputElement.textContent = text
-
-          // Dispatch input event
-          const inputEvent = new Event('input', { bubbles: true })
-          inputElement.dispatchEvent(inputEvent)
+          inputElement.dispatchEvent(new Event('input', { bubbles: true }))
         }
 
-        // Focus the input
         inputElement.focus()
 
-        // Try to find and click the send button after a short delay
+        // Send the message
         setTimeout(() => {
           const sendButton = document.querySelector(
-            'button[type="submit"], button[aria-label*="send" i], button[aria-label*="submit" i], button:has(svg)'
+            'button[type="submit"], button[aria-label*="send" i]'
           ) as HTMLButtonElement
 
           if (sendButton) {
             sendButton.click()
+          } else {
+            const form = inputElement.closest('form')
+            if (form) {
+              form.requestSubmit()
+            }
           }
-        }, 150)
+
+          // Remove flag after action completes
+          setTimeout(() => {
+            document.body.removeAttribute('data-programmatic-interaction')
+          }, 100)
+        }, 300)
+      } else {
+        document.body.removeAttribute('data-programmatic-interaction')
       }
     }, 100)
-
-    // Hide recommendations after clicking
-    setShowRecommendations(false)
   }, [])
 
-  // Watch for chat resets (new chat button clicks) and first message
+  return sendMessage
+}
+
+// Recommendation Box Component
+interface RecommendationBoxProps {
+  icon: string
+  text: string
+  onClick: () => void
+}
+
+function RecommendationBox({ icon, text, onClick }: RecommendationBoxProps) {
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onClick()
+  }, [onClick])
+
+  return (
+    <div
+      className="recommendation-box"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+    >
+      <span className="recommendation-icon">{icon}</span>
+      <p className="recommendation-text">{text}</p>
+    </div>
+  )
+}
+
+// Main App Component
+function App() {
+  const [showRecommendations, setShowRecommendations] = useState(true)
+  const sendMessage = useMessageSender()
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleRecommendationClick = useCallback((text: string) => {
+    setShowRecommendations(false)
+    sendMessage(text)
+  }, [sendMessage])
+
+  // Watch for new chat events to show recommendations again
   useEffect(() => {
-    // Create a MutationObserver to watch for DOM changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        // Check if messages were removed (indicating a new chat)
-        if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
-          // Look for message container being cleared
-          const messageContainer = document.querySelector('[class*="message"], [class*="chat"]')
-          if (messageContainer && messageContainer.children.length === 0) {
-            setShowRecommendations(true)
-          }
-        }
-
-        // Check if messages were added (user sent a message)
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          // Look for new messages being added
-          const hasMessages = document.querySelector('[class*="message"], [class*="Message"]')
-          if (hasMessages && showRecommendations) {
-            // Hide recommendations after first message
-            setShowRecommendations(false)
-          }
-        }
-      })
-    })
-
-    // Start observing after a delay to ensure C1Chat is mounted
-    const timeoutId = setTimeout(() => {
-      const chatContainer = document.querySelector('[class*="chat"], [class*="container"]')
-      if (chatContainer) {
-        observer.observe(chatContainer, {
-          childList: true,
-          subtree: true
-        })
-      }
-    }, 1000)
-
-    // Listen for clicks on elements that might trigger new chat
-    document.addEventListener('click', (e) => {
+    const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (target.textContent?.toLowerCase().includes('new chat') ||
-        target.getAttribute('aria-label')?.toLowerCase().includes('new chat')) {
+      if (
+        target.textContent?.toLowerCase().includes('new chat') ||
+        target.getAttribute('aria-label')?.toLowerCase().includes('new chat')
+      ) {
         setTimeout(() => setShowRecommendations(true), 100)
       }
-    })
-
-    return () => {
-      observer.disconnect()
-      clearTimeout(timeoutId)
     }
-  }, [showRecommendations])
 
-  // Inject recommendations directly into the chat DOM
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
+
+  // Inject recommendations into C1Chat DOM
   useEffect(() => {
     if (!showRecommendations) {
-      // Remove injected recommendations if they exist
-      const injected = document.querySelector('.recommendations-wrapper-injected')
+      const injected = document.querySelector('.recommendations-overlay')
       if (injected) {
         injected.remove()
       }
@@ -147,90 +158,82 @@ function App() {
     }
 
     const injectRecommendations = () => {
-      // Check if already injected
-      if (document.querySelector('.recommendations-wrapper-injected')) {
+      if (document.querySelector('.recommendations-overlay')) {
         return
       }
 
-      // Find the input element
-      const inputElement = document.querySelector('textarea, input[type="text"]') as HTMLElement
-
+      const inputElement = document.querySelector('textarea, input[type="text"]')
       if (!inputElement) {
         return
       }
 
-      // Find the parent container to inject before
       const targetContainer = inputElement.closest('[class*="container"], [class*="wrapper"], form, div') as HTMLElement
-
-      if (targetContainer) {
-        // Create recommendations HTML
-        const recommendationsHTML = `
-          <div class="recommendations-wrapper-injected" style="
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-          ">
-            <div class="recommendations-container">
-              ${recommendations.map((rec, index) => `
-                <div class="recommendation-box" data-rec-index="${index}">
-                  <span class="recommendation-icon">${rec.icon}</span>
-                  <p class="recommendation-text">${rec.text}</p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `
-
-        // Insert before the input container
-        targetContainer.insertAdjacentHTML('beforebegin', recommendationsHTML)
-
-        // Add click handlers
-        document.querySelectorAll('.recommendation-box').forEach((box, index) => {
-          box.addEventListener('click', (e) => {
-            handleRecommendationClick(recommendations[index].text, e as any)
-          })
-        })
+      if (!targetContainer) {
+        return
       }
+
+      // Create overlay container
+      const overlay = document.createElement('div')
+      overlay.className = 'recommendations-overlay'
+
+      const container = document.createElement('div')
+      container.className = 'recommendations-container'
+
+      RECOMMENDATIONS.forEach((rec, index) => {
+        const box = document.createElement('div')
+        box.className = 'recommendation-box'
+        box.setAttribute('role', 'button')
+        box.setAttribute('tabindex', '0')
+
+        const icon = document.createElement('span')
+        icon.className = 'recommendation-icon'
+        icon.textContent = rec.icon
+
+        const text = document.createElement('p')
+        text.className = 'recommendation-text'
+        text.textContent = rec.text
+
+        box.appendChild(icon)
+        box.appendChild(text)
+
+        box.addEventListener('click', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          e.stopImmediatePropagation()
+          handleRecommendationClick(rec.text)
+        }, { capture: true })
+
+        container.appendChild(box)
+      })
+
+      overlay.appendChild(container)
+      targetContainer.insertAdjacentElement('beforebegin', overlay)
     }
 
-    // Try to inject with delays - store timeout IDs to clear them
     const timeout1 = setTimeout(injectRecommendations, 500)
     const timeout2 = setTimeout(injectRecommendations, 1000)
-    const timeout3 = setTimeout(injectRecommendations, 2000)
 
-    // Cleanup function - clear timeouts and remove injected elements
     return () => {
       clearTimeout(timeout1)
       clearTimeout(timeout2)
-      clearTimeout(timeout3)
-      const injected = document.querySelector('.recommendations-wrapper-injected')
+      const injected = document.querySelector('.recommendations-overlay')
       if (injected) {
         injected.remove()
       }
     }
-  }, [showRecommendations, recommendations])
+  }, [showRecommendations, handleRecommendationClick])
 
   return (
-    <div className='app-container'>
+    <div className="app-container" ref={chatContainerRef}>
       <ThemeProvider mode="dark">
-        {/* Recommendations are now injected directly into chat DOM */}
-
-        <div className='app-container'>
-          <ThemeProvider mode="dark">
-            <C1Chat
-              apiUrl='https://marketinsight-skgl.onrender.com/api/chat'
-              agentName='Market Insight'
-              logoUrl='/icon.png'
-              formFactor='full-page'
-            />
-          </ThemeProvider>
-        </div>
-
+        <C1Chat
+          apiUrl="https://marketinsight-skgl.onrender.com/api/chat"
+          agentName="Market Insight"
+          logoUrl="/icon.png"
+          formFactor="full-page"
+        />
       </ThemeProvider>
     </div>
-
   )
 }
 
