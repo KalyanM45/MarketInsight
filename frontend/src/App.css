@@ -19,8 +19,13 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  /* Use dvh for better mobile support */
+  min-height: 100dvh;
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Prevent white space on mobile keyboard */
+  position: fixed;
+  width: 100%;
 }
 
 #root {
@@ -31,6 +36,8 @@ body {
 .app-container {
   width: 100%;
   height: 100vh;
+  /* Use dvh for mobile viewport */
+  min-height: 100dvh;
   overflow: hidden;
   position: relative;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
