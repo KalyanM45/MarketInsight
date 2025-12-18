@@ -7,3 +7,4 @@ langgraph
 yfinance
 langchain
 langchain-core
+langfuse

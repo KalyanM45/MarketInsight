@@ -5,12 +5,14 @@ from fastapi.responses import StreamingResponse
 from langchain_core.messages import SystemMessage, HumanMessage
 from config.config import RequestObject
 from MarketInsight.components.agent import agent
+from MarketInsight.utils.logger import get_logger
 
+logger = get_logger(__name__)
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update with your Vercel URL
+    allow_origins=["https://market-insight-theta.vercel.app/", "http://localhost:3000"],  # Update with your Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,17 +23,20 @@ async def chat(request: RequestObject):
     config = {'configurable': {'thread_id': request.threadId}}
 
     def generate():
-        for token, _ in agent.stream(
-            {
-                'messages': [
-                    SystemMessage(content="You are a stock market analyst. You have the ability to get the realtime stock market data and balance sheet, income statement, cash flow statement, historical data, and other financial data of the ticker from Yahoo Finance."),
-                    HumanMessage(content=request.prompt.content)
-                ]
-            },
-            stream_mode='messages',
-            config=config
-        ):
-            yield token.content
+        try:
+            for token, _ in agent.stream(
+                {
+                    'messages': [
+                        SystemMessage(content="You are a professional stock market analyst. For every user query, first determine whether a relevant tool can provide accurate or real-time data. If an appropriate tool exists, you must use it before answering. If the user does not provide an exact stock ticker, use the available tool to identify or resolve the correct ticker when required. Only when no suitable tool applies should you respond using your own reasoning and general market knowledge. Never guess, assume, or fabricate any financial data."),
+                        HumanMessage(content=request.prompt.content)
+                    ]
+                },
+                stream_mode='messages',
+                config=config
+            ):
+                yield token.content
+        except Exception as e:
+            logger.error(f"Error in chat: {e}")
     
     return StreamingResponse(generate(), media_type='text/event-stream',
         headers={
@@ -40,4 +45,5 @@ async def chat(request: RequestObject):
         })
 
 if __name__ == '__main__':
+    logger.info("App Initiated Successfully")
     uvicorn.run(app, host='0.0.0.0', port=8000)

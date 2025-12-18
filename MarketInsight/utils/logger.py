@@ -1,50 +1,44 @@
+# logger.py
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 
+# Create log file ONCE
+_current_date = datetime.now().strftime("%Y-%m-%d")
+_current_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+LOG_DIR = Path("logs") / _current_date
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / f"{_current_timestamp}.log"
+
+_LOGGING_CONFIGURED = False
+
 
 def get_logger(name: str = __name__) -> logging.Logger:
-    # Create logger
+    global _LOGGING_CONFIGURED
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    
-    # Avoid adding handlers multiple times
-    if logger.handlers:
-        return logger
-    
-    # Create log directory structure
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    current_timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-    
-    log_dir = Path("logs") / current_date
-    log_dir.mkdir(parents=True, exist_ok=True)
-    
-    log_file = log_dir / f"{current_timestamp}.log"
-    
-    # Create formatters with your custom format
-    # [YYYY-MM-DD HH:MM:SS]: app_name: TYPE: line_no: message
-    file_formatter = logging.Formatter(
-        '[%(asctime)s]: %(name)s: %(levelname)s: %(lineno)d: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    console_formatter = logging.Formatter(
-        '[%(asctime)s]: %(name)s: %(levelname)s: %(lineno)d: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    
-    # File handler - logs everything
-    file_handler = logging.FileHandler(log_file, encoding='utf-8')
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(file_formatter)
-    
-    # Console handler - logs only WARNING and ERROR
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.WARNING)
-    console_handler.setFormatter(console_formatter)
-    
-    # Add handlers to logger
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-    
+
+    if not _LOGGING_CONFIGURED:
+        formatter = logging.Formatter(
+            "[%(asctime)s]: %(name)s: %(levelname)s: %(lineno)d: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
+        file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.WARNING)
+        console_handler.setFormatter(formatter)
+
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        root_logger.addHandler(file_handler)
+        root_logger.addHandler(console_handler)
+
+        _LOGGING_CONFIGURED = True
+
     return logger
