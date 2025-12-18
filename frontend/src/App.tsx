@@ -56,12 +56,8 @@ function useMessageSender() {
           inputElement.dispatchEvent(new Event('input', { bubbles: true }))
         }
 
-        inputElement.focus()
-
-        // Scroll input into view on mobile (fixes keyboard overlap issue)
-        setTimeout(() => {
-          inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }, 100)
+        // Don't focus input to prevent keyboard popup on mobile
+        // This prevents the white space issue at the bottom
 
         // Send the message
         setTimeout(() => {
