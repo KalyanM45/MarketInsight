@@ -87,39 +87,6 @@ function useMessageSender() {
   return sendMessage
 }
 
-// Recommendation Box Component
-interface RecommendationBoxProps {
-  icon: string
-  text: string
-  onClick: () => void
-}
-
-function RecommendationBox({ icon, text, onClick }: RecommendationBoxProps) {
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onClick()
-  }, [onClick])
-
-  return (
-    <div
-      className="recommendation-box"
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onClick()
-        }
-      }}
-    >
-      <span className="recommendation-icon">{icon}</span>
-      <p className="recommendation-text">{text}</p>
-    </div>
-  )
-}
-
 // Main App Component
 function App() {
   const [showRecommendations, setShowRecommendations] = useState(true)
@@ -179,7 +146,7 @@ function App() {
       const container = document.createElement('div')
       container.className = 'recommendations-container'
 
-      RECOMMENDATIONS.forEach((rec, index) => {
+      RECOMMENDATIONS.forEach((rec) => {
         const box = document.createElement('div')
         box.className = 'recommendation-box'
         box.setAttribute('role', 'button')
