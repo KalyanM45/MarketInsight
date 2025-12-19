@@ -91,13 +91,72 @@ function useMessageSender() {
 // Main App Component
 function App() {
   const [showRecommendations, setShowRecommendations] = useState(true)
+  const [hasMessages, setHasMessages] = useState(false)
   const sendMessage = useMessageSender()
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const handleRecommendationClick = useCallback((text: string) => {
     setShowRecommendations(false)
+    setHasMessages(true)
     sendMessage(text)
   }, [sendMessage])
+
+  // Watch for user input to hide recommendations
+  useEffect(() => {
+    const handleInput = () => {
+      // Hide recommendations as soon as user starts typing
+      if (showRecommendations) {
+        setHasMessages(true)
+        setShowRecommendations(false)
+      }
+    }
+
+    const handleSubmit = () => {
+      // Ensure recommendations stay hidden after message is sent
+      setHasMessages(true)
+      setShowRecommendations(false)
+    }
+
+    // Start monitoring after a delay to ensure C1Chat is mounted
+    const timeout = setTimeout(() => {
+      // Monitor input elements
+      const inputElement = document.querySelector('textarea, input[type="text"]')
+      if (inputElement) {
+        inputElement.addEventListener('input', handleInput)
+        inputElement.addEventListener('keydown', handleInput)
+      }
+
+      // Monitor form submissions
+      const form = document.querySelector('form')
+      if (form) {
+        form.addEventListener('submit', handleSubmit)
+      }
+
+      // Also monitor for any button clicks that might send messages
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement
+        if (
+          target.matches('button[type="submit"], button[aria-label*="send" i]') ||
+          target.closest('button[type="submit"], button[aria-label*="send" i]')
+        ) {
+          handleSubmit()
+        }
+      })
+    }, 500)
+
+    return () => {
+      clearTimeout(timeout)
+      const inputElement = document.querySelector('textarea, input[type="text"]')
+      if (inputElement) {
+        inputElement.removeEventListener('input', handleInput)
+        inputElement.removeEventListener('keydown', handleInput)
+      }
+      const form = document.querySelector('form')
+      if (form) {
+        form.removeEventListener('submit', handleSubmit)
+      }
+    }
+  }, [showRecommendations])
 
   // Watch for new chat events to show recommendations again
   useEffect(() => {
@@ -107,7 +166,8 @@ function App() {
         target.textContent?.toLowerCase().includes('new chat') ||
         target.getAttribute('aria-label')?.toLowerCase().includes('new chat')
       ) {
-        // Show recommendations again
+        // Reset states to show recommendations again
+        setHasMessages(false)
         setTimeout(() => setShowRecommendations(true), 100)
 
         // Close menu/sidebar on mobile after clicking New Chat
@@ -131,7 +191,7 @@ function App() {
 
   // Inject recommendations into C1Chat DOM
   useEffect(() => {
-    if (!showRecommendations) {
+    if (!showRecommendations || hasMessages) {
       const injected = document.querySelector('.recommendations-overlay')
       if (injected) {
         injected.remove()
@@ -203,7 +263,7 @@ function App() {
         injected.remove()
       }
     }
-  }, [showRecommendations, handleRecommendationClick])
+  }, [showRecommendations, hasMessages, handleRecommendationClick])
 
   return (
     <div className="app-container" ref={chatContainerRef}>
