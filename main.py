@@ -26,6 +26,20 @@ langfuse = Langfuse(
     host=os.getenv("LANGFUSE_HOST")
 )
 
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "message": "Market Insight API", 
+        "status": "running",
+        "version": "1.0.0",
+        "endpoints": {
+            "/": "GET - API information",
+            "/health": "GET - Health check",
+            "/api/chat": "POST - Chat endpoint"
+        }
+    }
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint for service monitoring and keep-alive pings"""
