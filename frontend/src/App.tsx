@@ -269,7 +269,7 @@ function App() {
     <div className="app-container" ref={chatContainerRef}>
       <ThemeProvider mode="dark">
         <C1Chat
-          apiUrl="https://marketinsight-skgl.onrender.com/api/chat"
+          apiUrl={import.meta.env.VITE_API_URL || "https://marketinsight-skgl.onrender.com/api/chat"}
           agentName="Market Insight"
           logoUrl="/icon.png"
           formFactor="full-page"
