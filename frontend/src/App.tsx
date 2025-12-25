@@ -11,7 +11,7 @@ const RECOMMENDATIONS = [
   },
   {
     icon: '🧭',
-    text: "What are today's biggest gainers and losers in Indian Market?"
+    text: "Analyse Conditions of Large, Mid and Small Cap in Indian Market"
   },
   {
     icon: '📰',
